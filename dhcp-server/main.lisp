@@ -10,7 +10,13 @@
    :short #\l
    :long "log-level"
    :arg-parser #'identity
-   :meta-var "LEVEL"))
+   :meta-var "LEVEL")
+  (:name :subnet
+   :description "subnet cidr served by the dhcp server"
+   :short #\s
+   :long "subnet"
+   :arg-parser #'na4:make-network-from-cidr
+   :meta-var "SUBNET"))
 
 (defvar *log-levels* '(:trace :debug :info :warn :error :fatal))
 
@@ -26,7 +32,8 @@
 (defun help ()
   (opts:describe
    :prefix "DHCP server"
-   :usage-of "conet-dhcp-server"))
+   :usage-of "conet-dhcp-server")
+  (uiop:quit 0))
 
 (defun main (args)
   (multiple-value-bind (options _)
@@ -49,4 +56,6 @@
       (let ((log-level (intern (string-upcase level) :keyword)))
         (unless (member log-level *log-levels*)
           (fatal "unknown log level: ~S" level))
-        (log:config log-level)))))
+        (log:config log-level)))
+    (with-option (options :subnet subnet)
+      (start (make-instance 'dhcp-server :subnet subnet)))))

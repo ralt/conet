@@ -7,4 +7,5 @@
   :components ((:file "package")
                (:file "constants")
                (:file "packet")
+               (:file "server")
                (:file "main")))
