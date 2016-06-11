@@ -3,6 +3,6 @@
   :author "Florian Margaine <florian@margaine.com>"
   :license "MIT"
   :serial t
-  :depends-on (:network-addresses)
+  :depends-on (:unix-opts :log4cl :network-addresses)
   :components ((:file "package")
                (:file "main")))
