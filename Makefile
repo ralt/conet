@@ -1,6 +1,5 @@
 DHCP_SERVER_BIN=bin/conet-dhcp-server
 DHCP_SERVER_SRC=dhcp-server/
-RM=rm -rf
 
 all: $(DHCP_SERVER_BIN)
 
@@ -11,6 +10,6 @@ force_look:
 	true
 
 clean:
-	-$(RM) $(DHCP_SERVER_BIN)
+	$(MAKE) -C $(DHCP_SERVER_SRC) clean
 
 .PHONY: clean
