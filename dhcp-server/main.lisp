@@ -18,9 +18,9 @@
   (apply #'format t (format nil "fatal: ~A~%" msg) args)
   (uiop:quit -1))
 
-(defmacro when-option ((options opt) &body body)
-  `(let ((it (getf ,options ,opt)))
-     (when it
+(defmacro with-option ((options opt var) &body body)
+  `(let ((,var (getf ,options ,opt)))
+     (when ,var
        ,@body)))
 
 (defun help ()
@@ -43,10 +43,10 @@
     (declare (ignore _))
     (when (= (length args) 1)
       (help))
-    (when-option (options :help)
+    (with-option (options :help _)
       (help))
-    (when-option (options :log-level)
-      (let ((log-level (intern (string-upcase it) :keyword)))
+    (with-option (options :log-level level)
+      (let ((log-level (intern (string-upcase level) :keyword)))
         (unless (member log-level *log-levels*)
-          (fatal "unknown log level: ~S" it))
+          (fatal "unknown log level: ~S" level))
         (log:config log-level)))))
