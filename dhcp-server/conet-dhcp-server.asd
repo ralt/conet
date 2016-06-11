@@ -5,4 +5,6 @@
   :serial t
   :depends-on (:unix-opts :log4cl :network-addresses)
   :components ((:file "package")
+               (:file "constants")
+               (:file "packet")
                (:file "main")))
