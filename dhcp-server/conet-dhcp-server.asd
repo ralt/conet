@@ -3,7 +3,7 @@
   :author "Florian Margaine <florian@margaine.com>"
   :license "MIT"
   :serial t
-  :depends-on (:unix-opts :log4cl :network-addresses)
+  :depends-on (:unix-opts :log4cl :network-addresses :usocket)
   :components ((:file "package")
                (:file "constants")
                (:file "packet")
