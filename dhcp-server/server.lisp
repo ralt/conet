@@ -16,4 +16,9 @@
                          :in-new-thread nil))
 
 (defmethod handle-buffer ((server dhcp-server) buffer)
+  (handler-case
+      (render (reply (parse-dhcp-packet buffer)))
+    (dhcp-parse-error (e)
+      ; Not a DHCP packet, just ignore
+      nil))
   buffer)

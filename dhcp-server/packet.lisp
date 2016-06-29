@@ -54,14 +54,20 @@
    (file :type (byte-array 128) :initarg :file)
    (options :type dhcp-packet-options :initarg :options)))
 
+(defgeneric reply (packet)
+  (:documentation "Returns the reply for a DHCP request packet."))
+
+(defun render (packet)
+  "Returns a buffer of the rendered DHCP packet.")
+
 (defun default-ip-address (iaddr)
   (or iaddr (make-byte-array #(0 0 0 0))))
 
-(defun make-dhcp-packet (&key
+(defun make-dhcp-packet (class &key
                            operation-code xid (ciaddr nil) (yiaddr nil)
                            (siaddr nil) (giaddr nil) mac options)
   (make-instance
-   'dhcp-packet
+   class
    :operation-code (make-single-byte-array operation-code)
    :hardware-type (make-single-byte-array +ethernet+)
    :hops (make-single-byte-array 0)
@@ -77,19 +83,18 @@
    :file nil
    :options options))
 
-(defun make-dhcp-offer-packet (xid yiaddr siaddr mac subnet-mask router lease-time dns-servers)
-  (let ((options (list
-                  (make-option +dhcp-message-type+ +dhcpoffer+)
-                  (make-option +subnet-mask+ subnet-mask)
-                  (make-option +router+ router)
-                  (make-option +ip-address-lease-time+ lease-time)
-                  (make-option +server-identifier+ router)
-                  (make-option +dns-name-server+ dns-servers))))
-    (make-dhcp-packet
-     :operation-code +reply-message+
-     :xid xid
-     :ciaddr 0
-     :yiaddr yiaddr
-     :siaddr siaddr
-     :mac mac
-     :options (make-options options))))
+(defun parse-dhcp-packet (buffer)
+  "Returns a DHCP packet object from the raw buffer.
+
+This function can do 2 things:
+- Raise a dhcp-parse-error condition, if the buffer
+  is not a DHCP packet
+- Return a specalized dhcp-packet object.
+
+'Specialized' here means that it will return either
+a dhcp-discover-packet, a dhcp-request-packet, a
+dhcp-information-packet or a dhcp-release-packet
+object. This lets the caller immediately call the
+'reply' method on these objects to get the dhcp-packet
+object to render. (For example, a dhcp-discover-packet
+will return a dhcp-offer-packet.)")
