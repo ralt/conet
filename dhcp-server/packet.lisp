@@ -83,6 +83,8 @@
    :file nil
    :options options))
 
+(define-condition dhcp-parse-error (error) ())
+
 (defun parse-dhcp-packet (buffer)
   "Returns a DHCP packet object from the raw buffer.
 
@@ -97,4 +99,30 @@ dhcp-information-packet or a dhcp-release-packet
 object. This lets the caller immediately call the
 'reply' method on these objects to get the dhcp-packet
 object to render. (For example, a dhcp-discover-packet
-will return a dhcp-offer-packet.)")
+will return a dhcp-offer-packet.)
+
+The way to do this is the following:
+
+- First, check some basic heuristics (like the first bytes,
+  minimum length, etc)
+- Then, go straight to the 'options' field and parse it
+- Based on the option 53 (message type), we can know which
+  dhcp-packet subclass should be used."
+  (unless (looks-like-dhcp-packet buffer)
+    (error 'dhcp-parse-error))
+  ;; We just assume that the first option is the message type.
+  ;; TODO: review this.
+  (let ((message-type (elt buffer 242)))
+    (case ((= message-type +dhcpdiscover+)
+           ;; Pass the whole buffer or every field separately?
+           ;; TODO: make a macro.
+           (make-dhcp-discover-packet)))))
+
+(defun looks-like-dhcp-packet (buffer)
+  "Decide if a buffer looks like a DHCP packet."
+  (and
+   ;; Operation code is valid
+   (or (= (first buffer) #x01)
+       (= (first buffer) #x02))
+   ;; Minimum length
+   (> (length buffer) 240)))
