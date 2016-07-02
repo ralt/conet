@@ -85,6 +85,13 @@
 
 (define-condition dhcp-parse-error (error) ())
 
+(defvar *parsers* (make-hash-table))
+
+(defmacro define-packet-parser (option-type parser)
+  `(setf (gethash ,option-type *parsers*) #',parser))
+
+(define-packet-parser +dhcpdiscover+ make-dhcp-discover-packet)
+
 (defun parse-dhcp-packet (buffer)
   "Returns a DHCP packet object from the raw buffer.
 
@@ -113,10 +120,7 @@ The way to do this is the following:
   ;; We just assume that the first option is the message type.
   ;; TODO: review this.
   (let ((message-type (elt buffer 242)))
-    (case ((= message-type +dhcpdiscover+)
-           ;; Pass the whole buffer or every field separately?
-           ;; TODO: make a macro.
-           (make-dhcp-discover-packet)))))
+    (funcall (gethash message-type *parsers*))))
 
 (defun looks-like-dhcp-packet (buffer)
   "Decide if a buffer looks like a DHCP packet."
