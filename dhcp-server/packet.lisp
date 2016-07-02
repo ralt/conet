@@ -119,8 +119,7 @@ The way to do this is the following:
     (error 'dhcp-parse-error))
   ;; We just assume that the first option is the message type.
   ;; TODO: review this.
-  (let ((message-type (elt buffer 242)))
-    (funcall (gethash message-type *parsers*))))
+  (funcall (gethash (elt buffer 242) *parsers*)))
 
 (defun looks-like-dhcp-packet (buffer)
   "Decide if a buffer looks like a DHCP packet."
